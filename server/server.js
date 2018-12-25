@@ -1,48 +1,25 @@
-var mongoose = require('mongoose');
+var express = require('express');
+var bodyParser = require('body-parser');
 
-mongoose.Promise = global.Promise;
+var {mongoose} = require('./db/mongoose');
+var {Todo} = require('./models/todo');
+var {User} = require('./models/user');
 
-const url = 'mongodb://localhost:27017/TodoApp';
+var app = express();
+app.use(bodyParser.json());
 
-mongoose.connect(url, { useNewUrlParser: true });
-
-//make a new modal
-var Todo = mongoose.model('Todo',{
-    text:{
-        type: String,
-        required: true,
-        minlength: 1,
-        trim: true
-    },
-    completed:{
-        type: Boolean,
-        default: false
-    },
-    completedAt :{
-        type: Number,
-        default: null
-    }
+app.post('/todos', (req, res) => {
+    var text = req.body.text;
+    var todo = new Todo({
+        text: text
+    });
+    todo.save().then((doc)=>{
+        res.send(doc);
+    }, (e) => {
+        res.send(e);
+    });
 });
 
-//Instanciate the modal
-// var newTodo = new Todo({
-//     text: '    new note maked with space at begin and end of statement     '    
-// });
-
-var User = mongoose.model('User', {
-    email:{
-        type: String,
-        required: true,
-        minlength: 10,
-        trim: true
-    }
-});
-
-var newUser = new User({
-    email: 'elghazrani.abdelali@cbc.org'
-});
-newUser.save().then((doc) => {
-    console.log(doc);
-}, (e) => {
-    console.log('Error : ', e);
+app.listen(3000, () => {
+    console.log('Express Listening on port 3000...');
 });
